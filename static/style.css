@@ -1,0 +1,13 @@
+#stCode,
+#convertedCode {
+  height: 80vh;
+  width: 42.5vw;
+}
+
+@media screen and (max-width: 600px) {
+    #stCode,
+    #convertedCode {
+      height: 35vh;
+      width: 85vw;
+    }
+}
