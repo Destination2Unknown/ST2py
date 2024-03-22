@@ -89,7 +89,7 @@ class ConvertorApp:
 
             python_code = f"match {case_check}:\n"
 
-            case_blocks = re.finditer(r"\b(\d+)\s*:\s*(.*?)\s*(?:\n|$)", case_block, re.IGNORECASE | re.DOTALL)
+            case_blocks = re.finditer(r"\b(\d+|\w+)\s*:\s*(.*?)\s*(?:\n|$)", case_block, re.IGNORECASE | re.DOTALL)
 
             # Check each condition of CASE
             for case_match in case_blocks:
