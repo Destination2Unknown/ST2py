@@ -51,6 +51,7 @@ class ConvertorApp:
         ret_code = re.sub(var_declaration_pattern, new_st_code, st_code, flags=re.DOTALL)
         ret_code = self.convert_ifs(ret_code)
         ret_code = self.convert_loops(ret_code)
+        ret_code = self.convert_cases(ret_code)
         ret_code = self.clean_up_python_code(ret_code)
 
         return ret_code
@@ -75,6 +76,38 @@ class ConvertorApp:
         # Convert REPEAT loops
         repeat_loop_pattern = r"REPEAT\s*\n(.*?)\n\s*UNTIL\s+(.*?)\s+END_REPEAT"
         st_code = re.sub(repeat_loop_pattern, r"while not (\2):\n\1\n", st_code, flags=re.DOTALL)
+
+        return st_code
+
+    def convert_cases(self, st_code):
+        case_pattern = r"(CASE\s+(.*?)\s+OF(.*?)END_CASE;)"
+        cases = re.finditer(case_pattern, st_code, re.IGNORECASE | re.DOTALL)
+        # Check each CASE pattern
+        for singular_pattern in cases:
+            case_check = singular_pattern.group(2).strip()
+            case_block = singular_pattern.group(3).strip()
+
+            python_code = f"match {case_check}:\n"
+
+            case_blocks = re.finditer(r"\b(\d+)\s*:\s*(.*?)\s*(?:\n|$)", case_block, re.IGNORECASE | re.DOTALL)
+
+            # Check each condition of CASE
+            for case_match in case_blocks:
+                condition = case_match.group(1).strip()
+                code = case_match.group(2).strip()
+                code = code.replace(":", "").replace(";", "")
+                python_code += f"    case {condition}:\n"
+                python_code += f"        {code}\n"
+
+            # Check for ELSE pattern
+            else_block = re.search(r"ELSE\s*(.*?)(?=END_CASE|$)", case_block, re.IGNORECASE | re.DOTALL)
+            if else_block:
+                else_code = else_block.group(1).strip()
+                else_code = re.sub(r"[:;\n]", "", else_code).strip()
+                python_code += f"    case _:\n"
+                python_code += f"        {else_code}\n"
+
+            st_code = st_code.replace(singular_pattern.group(0), python_code)
 
         return st_code
 
