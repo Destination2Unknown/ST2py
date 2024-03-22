@@ -89,7 +89,7 @@ class ConvertorApp:
 
             python_code = f"match {case_check}:\n"
 
-            case_blocks = re.finditer(r"\b(\d+|\w+)\s*:\s*(.*?)\s*(?:\n|$)", case_block, re.IGNORECASE | re.DOTALL)
+            case_blocks = re.finditer(r"(.*?):\s*((?:(?:(?<!:=):|[^:])*?))(?=\s*(?:\d+\s*:\s*|ELSE|END_CASE|$))", case_block, re.IGNORECASE | re.DOTALL)
 
             # Check each condition of CASE
             for case_match in case_blocks:
@@ -97,16 +97,11 @@ class ConvertorApp:
                 code = case_match.group(2).strip()
                 code = code.replace(":", "").replace(";", "")
                 python_code += f"    case {condition}:\n"
-                python_code += f"        {code}\n"
+                for line in code.split("\n"):
+                    python_code += f"        {line.strip()}\n"
 
             # Check for ELSE pattern
-            else_block = re.search(r"ELSE\s*(.*?)(?=END_CASE|$)", case_block, re.IGNORECASE | re.DOTALL)
-            if else_block:
-                else_code = else_block.group(1).strip()
-                else_code = re.sub(r"[:;\n]", "", else_code).strip()
-                python_code += f"    case _:\n"
-                python_code += f"        {else_code}\n"
-
+            python_code = re.sub(r"ELSE", "_", python_code, flags=re.IGNORECASE)
             st_code = st_code.replace(singular_pattern.group(0), python_code)
 
         return st_code
