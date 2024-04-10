@@ -108,12 +108,12 @@ class ConvertorApp:
 
     def clean_up_python_code(self, python_code):
         # Replace ST keywords with Python keywords...
-        python_code = python_code.replace("RETURN", "return")
-        python_code = python_code.replace("EXIT", "break")
-        python_code = python_code.replace("ELSIF", "elif")
-        python_code = python_code.replace("ELSEIF", "elif")
-        python_code = python_code.replace("false", "False")
-        python_code = python_code.replace("true", "True")
+        python_code = re.sub(r"\bRETURN\b", "return", python_code, flags=re.IGNORECASE)
+        python_code = re.sub(r"\bEXIT\b", "break", python_code, flags=re.IGNORECASE)
+        python_code = re.sub(r"\bELSIF\b", "elif", python_code, flags=re.IGNORECASE)
+        python_code = re.sub(r"\bELSEIF\b", "elif", python_code, flags=re.IGNORECASE)
+        python_code = re.sub(r"\bfalse\b", "False", python_code, flags=re.IGNORECASE)
+        python_code = re.sub(r"\btrue\b", "True", python_code, flags=re.IGNORECASE)
         python_code = python_code.replace(":=", "=")
         python_code = python_code.replace(";", "")
         python_code = python_code.strip()
